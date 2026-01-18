@@ -1,0 +1,26 @@
+{
+  "model_name": "en_core_web_sm",
+  "training_examples": 1117,
+  "save_time": "2026-01-18T19:26:00.850761",
+  "labels": [
+    "CARDINAL",
+    "COMPANY",
+    "DATE",
+    "EVENT",
+    "FAC",
+    "GPE",
+    "LANGUAGE",
+    "LAW",
+    "LOC",
+    "MONEY",
+    "NORP",
+    "ORDINAL",
+    "ORG",
+    "PERCENT",
+    "PERSON",
+    "PRODUCT",
+    "QUANTITY",
+    "TIME",
+    "WORK_OF_ART"
+  ]
+}

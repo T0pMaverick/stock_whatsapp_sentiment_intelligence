@@ -1,0 +1,233 @@
+[
+  {
+    "company": "SAMP",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.92,
+    "sentiment_score": 0.24,
+    "hype_score": 0.1,
+    "reasoning": [
+      "Mixed sentiment signals with neutral bias",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed",
+      "Urgency and time-sensitive language detected"
+    ]
+  },
+  {
+    "company": "COMB.X0000",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.87,
+    "sentiment_score": 0.69,
+    "hype_score": 0.0,
+    "reasoning": [
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed"
+    ]
+  },
+  {
+    "company": "CHL.X0000",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 1.0,
+    "sentiment_score": 0.28,
+    "hype_score": 0.0,
+    "reasoning": []
+  },
+  {
+    "company": "GHLL",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.88,
+    "sentiment_score": 0.64,
+    "hype_score": 0.0,
+    "reasoning": [
+      "Predominantly bullish sentiment language",
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned"
+    ]
+  },
+  {
+    "company": "EML",
+    "prediction_window": "next_3_days",
+    "direction": "HOLD",
+    "confidence": 1.0,
+    "sentiment_score": -0.0,
+    "hype_score": 0.0,
+    "reasoning": []
+  },
+  {
+    "company": "DOCK",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.87,
+    "sentiment_score": 0.67,
+    "hype_score": 0.0,
+    "reasoning": [
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed"
+    ]
+  },
+  {
+    "company": "NDB",
+    "prediction_window": "next_3_days",
+    "direction": "HOLD",
+    "confidence": 0.99,
+    "sentiment_score": 0.17,
+    "hype_score": 0.7,
+    "reasoning": [
+      "High discussion volume but limited participant diversity",
+      "Intense rapid-fire discussion patterns",
+      "Persistent user engagement and repeated mentions"
+    ]
+  },
+  {
+    "company": "SUN",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.86,
+    "sentiment_score": 0.71,
+    "hype_score": 0.0,
+    "reasoning": [
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed"
+    ]
+  },
+  {
+    "company": "SLTL",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.88,
+    "sentiment_score": 0.25,
+    "hype_score": 0.1,
+    "reasoning": [
+      "Moderate discussion activity",
+      "Mixed sentiment signals with neutral bias",
+      "Multiple risk warnings and cautionary language",
+      "Attractive valuation metrics mentioned"
+    ]
+  },
+  {
+    "company": "DFCC",
+    "prediction_window": "next_3_days",
+    "direction": "HOLD",
+    "confidence": 0.89,
+    "sentiment_score": 0.17,
+    "hype_score": 0.3,
+    "reasoning": [
+      "Moderate discussion activity",
+      "Mixed sentiment signals with neutral bias",
+      "Multiple risk warnings and cautionary language",
+      "Attractive valuation metrics mentioned"
+    ]
+  },
+  {
+    "company": "ASCO",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.92,
+    "sentiment_score": 0.53,
+    "hype_score": 0.0,
+    "reasoning": [
+      "Predominantly bullish sentiment language",
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed"
+    ]
+  },
+  {
+    "company": "AEL",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.71,
+    "sentiment_score": 0.73,
+    "hype_score": 0.1,
+    "reasoning": [
+      "Predominantly bullish sentiment language",
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed"
+    ]
+  },
+  {
+    "company": "SHAW",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.92,
+    "sentiment_score": 0.53,
+    "hype_score": 0.0,
+    "reasoning": [
+      "Predominantly bullish sentiment language",
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed"
+    ]
+  },
+  {
+    "company": "CHL",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 1.0,
+    "sentiment_score": 0.28,
+    "hype_score": 0.0,
+    "reasoning": []
+  },
+  {
+    "company": "ODEL",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.86,
+    "sentiment_score": 0.32,
+    "hype_score": 0.1,
+    "reasoning": [
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed",
+      "Urgency and time-sensitive language detected"
+    ]
+  },
+  {
+    "company": "COMB",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.87,
+    "sentiment_score": 0.69,
+    "hype_score": 0.0,
+    "reasoning": [
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed"
+    ]
+  },
+  {
+    "company": "SAMP.X0000",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.92,
+    "sentiment_score": 0.24,
+    "hype_score": 0.1,
+    "reasoning": [
+      "Mixed sentiment signals with neutral bias",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed",
+      "Urgency and time-sensitive language detected"
+    ]
+  },
+  {
+    "company": "LLUB",
+    "prediction_window": "next_3_days",
+    "direction": "UP",
+    "confidence": 0.92,
+    "sentiment_score": 0.54,
+    "hype_score": 0.0,
+    "reasoning": [
+      "Predominantly bullish sentiment language",
+      "Strong positive sentiment indicators",
+      "Specific downside price targets mentioned",
+      "Technical support levels discussed"
+    ]
+  }
+]
