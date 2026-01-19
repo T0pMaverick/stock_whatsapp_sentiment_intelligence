@@ -12,7 +12,7 @@ lightgbm
 scikit-learn
 vaderSentiment
 textblob
-tvdatafeed
+git+https://github.com/rongardF/tvdatafeed.git
 fastapi
 uvicorn
 pydantic
