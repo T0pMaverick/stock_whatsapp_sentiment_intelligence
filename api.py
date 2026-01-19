@@ -35,19 +35,20 @@ reasoning_engine = None
 preprocessor = None
 stock_processor = None
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Load models on startup"""
-    global sentiment_analyzer, stock_predictor, reasoning_engine, preprocessor, stock_processor
-    
-    logger.info("Loading models...")
-    
-    try:
-        # Load sentiment analyzer
+def get_sentiment_analyzer():
+    """Lazy load sentiment analyzer"""
+    global sentiment_analyzer
+    if sentiment_analyzer is None:
+        logger.info("Loading sentiment analyzer...")
         sentiment_analyzer = SentimentAnalyzer()
         logger.info("✅ Sentiment analyzer loaded")
-        
-        # Load stock predictor
+    return sentiment_analyzer
+
+def get_stock_predictor():
+    """Lazy load stock predictor"""
+    global stock_predictor
+    if stock_predictor is None:
+        logger.info("Loading stock predictor...")
         stock_predictor = StockPredictor()
         predictor_path = Config.MODELS_DIR / "trained" / "stock_predictor.joblib"
         
@@ -56,21 +57,41 @@ async def lifespan(app: FastAPI):
             logger.info("✅ Stock predictor loaded")
         else:
             logger.warning("⚠️ Stock predictor model not found - predictions will be sentiment-based only")
-        
-        # Load other components
+    return stock_predictor
+
+def get_reasoning_engine():
+    """Lazy load reasoning engine"""
+    global reasoning_engine
+    if reasoning_engine is None:
+        logger.info("Loading reasoning engine...")
         reasoning_engine = PredictionReasoning()
+        logger.info("✅ Reasoning engine loaded")
+    return reasoning_engine
+
+def get_preprocessor():
+    """Lazy load preprocessor"""
+    global preprocessor
+    if preprocessor is None:
+        logger.info("Loading preprocessor...")
         preprocessor = MessagePreprocessor()
+        logger.info("✅ Preprocessor loaded")
+    return preprocessor
+
+def get_stock_processor():
+    """Lazy load stock processor"""
+    global stock_processor
+    if stock_processor is None:
+        logger.info("Loading stock processor...")
         stock_processor = StockDataProcessor()
-        
-        logger.info("✅ All models loaded successfully")
-        
-    except Exception as e:
-        logger.error(f"❌ Error loading models: {e}")
-        raise
-    
+        logger.info("✅ Stock processor loaded")
+    return stock_processor
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Fast startup - models loaded lazily"""
+    logger.info("🚀 FastAPI starting up - using lazy loading for models")
     yield
-    
-    logger.info("Shutting down...")
+    logger.info("🛑 FastAPI shutting down...")
 
 # Create FastAPI app
 app = FastAPI(
@@ -137,6 +158,9 @@ async def predict_company_movement(symbol: str, days_back: int = 7):
     """
     try:
         start_time = datetime.now()
+        
+        # Lazy load required components
+        reasoning_engine = get_reasoning_engine()
         
         # Normalize symbol format
         if not symbol.endswith('.N0000') and not symbol.endswith('.X0000'):
@@ -270,6 +294,7 @@ async def _get_recent_company_messages(symbol: str, alt_symbol: str = None, days
     except Exception as e:
         logger.error(f"Error getting recent messages for {symbol}: {e}")
         raise
+
 # API Endpoints
 @app.get("/", response_model=HealthResponse)
 async def root():
@@ -279,7 +304,7 @@ async def root():
         timestamp=datetime.now(),
         models_loaded={
             "sentiment_analyzer": sentiment_analyzer is not None,
-            "stock_predictor": stock_predictor is not None and stock_predictor.is_trained,
+            "stock_predictor": stock_predictor is not None and stock_predictor.is_trained if stock_predictor else False,
             "reasoning_engine": reasoning_engine is not None,
             "preprocessor": preprocessor is not None
         }
@@ -290,6 +315,11 @@ async def predict_single_message(message: MessageInput):
     """Predict stock movement from a single message"""
     try:
         start_time = datetime.now()
+        
+        # Lazy load required components
+        preprocessor = get_preprocessor()
+        sentiment_analyzer = get_sentiment_analyzer()
+        reasoning_engine = get_reasoning_engine()
         
         # Preprocess message
         df = pd.DataFrame([{
@@ -473,6 +503,11 @@ async def predict_batch_messages(batch_input: BatchMessageInput):
     try:
         start_time = datetime.now()
         
+        # Lazy load required components
+        preprocessor = get_preprocessor()
+        sentiment_analyzer = get_sentiment_analyzer()
+        reasoning_engine = get_reasoning_engine()
+        
         # Convert to DataFrame
         messages_data = []
         for i, msg in enumerate(batch_input.messages):
@@ -608,6 +643,10 @@ async def analyze_sentiment(message: MessageInput):
         if not message.text.strip():
             raise HTTPException(status_code=400, detail="Message text cannot be empty")
         
+        # Lazy load required components
+        preprocessor = get_preprocessor()
+        sentiment_analyzer = get_sentiment_analyzer()
+        
         # Clean text
         cleaned_text = preprocessor.clean_text(message.text)
         
@@ -631,6 +670,9 @@ async def analyze_sentiment(message: MessageInput):
 async def get_supported_companies():
     """Get list of supported companies"""
     try:
+        # Lazy load required components
+        stock_processor = get_stock_processor()
+        
         companies = stock_processor.load_symbols()
         return [
             {
