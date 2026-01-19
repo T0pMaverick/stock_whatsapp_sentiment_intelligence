@@ -691,14 +691,14 @@ async def health_check():
     """Detailed health check"""
     return await root()
 
-# Run configuration
-if __name__ == "__main__":
-    import uvicorn
+# # Run configuration
+# if __name__ == "__main__":
+#     import uvicorn
     
-    uvicorn.run(
-        "api:app",
-        host=Config.API_HOST,
-        port=Config.API_PORT,
-        reload=Config.API_RELOAD,
-        log_level="info"
-    )
+#     uvicorn.run(
+#         "api:app",
+#         host=Config.API_HOST,
+#         port=Config.API_PORT,
+#         reload=Config.API_RELOAD,
+#         log_level="info"
+#     )
