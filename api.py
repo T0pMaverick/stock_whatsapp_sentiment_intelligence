@@ -12,6 +12,7 @@ import numpy as np
 import asyncio
 from contextlib import asynccontextmanager
 from sqlalchemy import text,create_engine
+import os
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
@@ -691,14 +692,17 @@ async def health_check():
     """Detailed health check"""
     return await root()
 
-# # Run configuration
-# if __name__ == "__main__":
-#     import uvicorn
+if __name__ == "__main__":
+    import uvicorn
     
-#     uvicorn.run(
-#         "api:app",
-#         host=Config.API_HOST,
-#         port=Config.API_PORT,
-#         reload=Config.API_RELOAD,
-#         log_level="info"
-#     )
+    # Get port from environment (Render sets this)
+    port = int(os.getenv("PORT", 8000))
+    
+    logger.info(f"Starting server on 0.0.0.0:{port}")
+    
+    uvicorn.run(
+        "api:app",  # Update this to match your filename
+        host="0.0.0.0",
+        port=port,
+        log_level="info"
+    )
