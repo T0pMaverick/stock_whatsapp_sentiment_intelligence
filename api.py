@@ -692,17 +692,4 @@ async def health_check():
     """Detailed health check"""
     return await root()
 
-if __name__ == "__main__":
-    import uvicorn
-    
-    # Get port from environment (Render sets this)
-    port = int(os.getenv("PORT", 8000))
-    
-    logger.info(f"Starting server on 0.0.0.0:{port}")
-    
-    uvicorn.run(
-        "api:app",  # Update this to match your filename
-        host="0.0.0.0",
-        port=port,
-        log_level="info"
-    )
+
