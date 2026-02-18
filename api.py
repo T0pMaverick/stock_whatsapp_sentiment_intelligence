@@ -130,31 +130,29 @@ def start_scheduler():
     try:
         logger.info("Starting automation scheduler...")
         
-        # Job 1: Stock Data Sync - Every hour from 9AM-3PM, Monday-Friday
-        # This job fetches real-time CSE stock prices during market hours only
+        # ============== PRODUCTION SCHEDULE ==============
+        # Job 1: Stock Data Sync - Hourly during market hours (9AM-3PM Mon-Fri)
         scheduler.add_job(
             stock_data_sync_job,
-            CronTrigger(hour="9-14", minute="0", day_of_week="0-4"),
+            CronTrigger(hour='9-15', minute=0, day_of_week='mon-fri'),
             id="stock_sync",
             max_instances=1,
             coalesce=True
         )
-        logger.info("Stock Data Sync scheduled (hourly 9AM-3PM, Mon-Fri)")
+        logger.info("PRODUCTION: Stock Data Sync scheduled (Hourly 9AM-3PM Mon-Fri)")
         
-        # Job 2: Message Processing - Every hour at minute 10
-        # This job processes new WhatsApp messages and performs sentiment analysis
-        # Runs at 10 minutes past every hour to avoid conflicts with stock sync
+        # Job 2: Message Processing - Every 70 minutes (Heart of the system)
+        from apscheduler.triggers.interval import IntervalTrigger
         scheduler.add_job(
             message_processing_job,
-            CronTrigger(minute="10"),
+            IntervalTrigger(minutes=70),
             id="message_processing",
             max_instances=1,
             coalesce=True
         )
-        logger.info("Message Processing scheduled (hourly at minute 10)")
+        logger.info("PRODUCTION: Message Processing scheduled (Every 70 minutes)")
         
-        # Job 3: Sender Impact Analysis - Daily at 2 AM
-        # This job analyzes which group members provide the most accurate predictions
+        # Job 3: Sender Impact Analysis - Daily at 2AM
         scheduler.add_job(
             sender_impact_analysis_job,
             CronTrigger(hour=2, minute=0),
@@ -162,18 +160,18 @@ def start_scheduler():
             max_instances=1,
             coalesce=True
         )
-        logger.info("Sender Impact Analysis scheduled (daily 2 AM)")
+        logger.info("PRODUCTION: Sender Impact Analysis scheduled (Daily at 2AM)")
         
-        # Job 4: Model Retraining - Weekly Sunday at 1 AM
-        # This job retrains ML models with new data to improve accuracy
+        # Job 4: Model Retraining - Sunday at 1AM
         scheduler.add_job(
             model_retraining_job,
-            CronTrigger(day_of_week=6, hour=1, minute=0),
+            CronTrigger(hour=1, minute=0, day_of_week='sun'),
             id="model_retraining",
             max_instances=1,
             coalesce=True
         )
-        logger.info("Model Retraining scheduled (Sunday 1 AM)")
+        logger.info("PRODUCTION: Model Retraining scheduled (Sunday at 1AM)")
+        # ============== END PRODUCTION SCHEDULE ==============
         
         # Start the scheduler to begin executing jobs according to their schedules
         scheduler.start()
