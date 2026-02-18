@@ -14,8 +14,18 @@ from contextlib import asynccontextmanager
 from sqlalchemy import text,create_engine
 import os
 
+# APScheduler imports
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
+
+# Import job functions
+from jobs.stock_sync_job import stock_data_sync_job
+from jobs.message_process_job import message_processing_job
+from jobs.sender_analysis_job import sender_impact_analysis_job
+from jobs.model_retrain_job import model_retraining_job
 
 from config import Config
 from data.whatsapp_parser import WhatsAppDataParser
@@ -42,7 +52,7 @@ def get_sentiment_analyzer():
     if sentiment_analyzer is None:
         logger.info("Loading sentiment analyzer...")
         sentiment_analyzer = SentimentAnalyzer()
-        logger.info("✅ Sentiment analyzer loaded")
+        logger.info("Sentiment analyzer loaded")
     return sentiment_analyzer
 
 def get_stock_predictor():
@@ -55,9 +65,9 @@ def get_stock_predictor():
         
         if predictor_path.exists():
             stock_predictor.load_model(str(predictor_path))
-            logger.info("✅ Stock predictor loaded")
+            logger.info("Stock predictor loaded")
         else:
-            logger.warning("⚠️ Stock predictor model not found - predictions will be sentiment-based only")
+            logger.warning("Stock predictor model not found - predictions will be sentiment-based only")
     return stock_predictor
 
 def get_reasoning_engine():
@@ -66,7 +76,7 @@ def get_reasoning_engine():
     if reasoning_engine is None:
         logger.info("Loading reasoning engine...")
         reasoning_engine = PredictionReasoning()
-        logger.info("✅ Reasoning engine loaded")
+        logger.info("Reasoning engine loaded")
     return reasoning_engine
 
 def get_preprocessor():
@@ -75,7 +85,7 @@ def get_preprocessor():
     if preprocessor is None:
         logger.info("Loading preprocessor...")
         preprocessor = MessagePreprocessor()
-        logger.info("✅ Preprocessor loaded")
+        logger.info("Preprocessor loaded")
     return preprocessor
 
 def get_stock_processor():
@@ -84,15 +94,108 @@ def get_stock_processor():
     if stock_processor is None:
         logger.info("Loading stock processor...")
         stock_processor = StockDataProcessor()
-        logger.info("✅ Stock processor loaded")
+        logger.info("Stock processor loaded")
     return stock_processor
+
+# Initialize scheduler
+scheduler = BackgroundScheduler()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Fast startup - models loaded lazily"""
-    logger.info("🚀 FastAPI starting up - using lazy loading for models")
+    """Fast startup with scheduler and lazy model loading"""
+    logger.info("FastAPI starting up...")
+    
+    # Start scheduler with all automation jobs
+    start_scheduler()
+    
     yield
-    logger.info("🛑 FastAPI shutting down...")
+    
+    # Shutdown scheduler
+    shutdown_scheduler()
+    logger.info("FastAPI shutting down...")
+
+def start_scheduler():
+    """
+    Start the background scheduler with all automation jobs.
+    
+    This function initializes and starts 4 critical automation jobs:
+    1. Stock Data Sync - Fetches CSE stock prices during market hours
+    2. Message Processing - Processes WhatsApp messages for sentiment analysis  
+    3. Sender Impact Analysis - Analyzes member prediction accuracy
+    4. Model Retraining - Updates ML models weekly
+    
+    All jobs are configured with max_instances=1 and coalesce=True to prevent
+    overlapping executions and job queue buildup.
+    """
+    try:
+        logger.info("Starting automation scheduler...")
+        
+        # Job 1: Stock Data Sync - Every hour from 9AM-3PM, Monday-Friday
+        # This job fetches real-time CSE stock prices during market hours only
+        scheduler.add_job(
+            stock_data_sync_job,
+            CronTrigger(hour="9-14", minute="0", day_of_week="0-4"),
+            id="stock_sync",
+            max_instances=1,
+            coalesce=True
+        )
+        logger.info("Stock Data Sync scheduled (hourly 9AM-3PM, Mon-Fri)")
+        
+        # Job 2: Message Processing - Every hour at minute 10
+        # This job processes new WhatsApp messages and performs sentiment analysis
+        # Runs at 10 minutes past every hour to avoid conflicts with stock sync
+        scheduler.add_job(
+            message_processing_job,
+            CronTrigger(minute="10"),
+            id="message_processing",
+            max_instances=1,
+            coalesce=True
+        )
+        logger.info("Message Processing scheduled (hourly at minute 10)")
+        
+        # Job 3: Sender Impact Analysis - Daily at 2 AM
+        # This job analyzes which group members provide the most accurate predictions
+        scheduler.add_job(
+            sender_impact_analysis_job,
+            CronTrigger(hour=2, minute=0),
+            id="sender_analysis",
+            max_instances=1,
+            coalesce=True
+        )
+        logger.info("Sender Impact Analysis scheduled (daily 2 AM)")
+        
+        # Job 4: Model Retraining - Weekly Sunday at 1 AM
+        # This job retrains ML models with new data to improve accuracy
+        scheduler.add_job(
+            model_retraining_job,
+            CronTrigger(day_of_week=6, hour=1, minute=0),
+            id="model_retraining",
+            max_instances=1,
+            coalesce=True
+        )
+        logger.info("Model Retraining scheduled (Sunday 1 AM)")
+        
+        # Start the scheduler to begin executing jobs according to their schedules
+        scheduler.start()
+        logger.info("All automation jobs started successfully")
+        
+    except Exception as e:
+        logger.error(f"Failed to start scheduler: {e}")
+
+def shutdown_scheduler():
+    """
+    Shutdown the background scheduler gracefully.
+    
+    This function ensures that all running jobs complete before shutting down
+    the scheduler to prevent data corruption or incomplete operations.
+    """
+    try:
+        if scheduler.running:
+            logger.info("Shutting down automation scheduler...")
+            scheduler.shutdown()
+            logger.info("Scheduler shutdown complete")
+    except Exception as e:
+        logger.error(f"Error shutting down scheduler: {e}")
 
 # Create FastAPI app
 app = FastAPI(
@@ -691,5 +794,65 @@ async def get_supported_companies():
 async def health_check():
     """Detailed health check"""
     return await root()
+
+@app.get("/scheduler/status")
+async def get_scheduler_status():
+    """Get status of all scheduled automation jobs"""
+    try:
+        if not scheduler.running:
+            return {
+                "scheduler_status": "stopped",
+                "jobs": [],
+                "message": "Scheduler is not running"
+            }
+        
+        jobs_info = []
+        for job in scheduler.get_jobs():
+            jobs_info.append({
+                "id": job.id,
+                "name": job.name or job.id,
+                "next_run": job.next_run_time.isoformat() if job.next_run_time else None,
+                "trigger": str(job.trigger),
+                "max_instances": job.max_instances,
+                "coalesce": job.coalesce
+            })
+        
+        return {
+            "scheduler_status": "running",
+            "total_jobs": len(jobs_info),
+            "jobs": jobs_info,
+            "message": "All automation jobs are active"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting scheduler status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/scheduler/trigger/{job_id}")
+async def trigger_job(job_id: str):
+    """Manually trigger a specific automation job"""
+    try:
+        job = scheduler.get_job(job_id)
+        if not job:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Job '{job_id}' not found. Available jobs: stock_sync, message_processing, sender_analysis, model_retraining"
+            )
+        
+        # Trigger the job
+        scheduler.modify_job(job_id, next_run_time=datetime.now())
+        
+        return {
+            "status": "triggered",
+            "job_id": job_id,
+            "message": f"Job '{job_id}' has been manually triggered",
+            "next_run": datetime.now().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error triggering job {job_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
